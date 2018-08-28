@@ -98,6 +98,25 @@
 						</textarea>
 					</section>
 
+					<section data-markdown>
+						<textarea data-template>
+						## Single File Vue Component
+
+						```html
+						<template>
+						...
+						</template>
+
+						<script>
+						...
+						</script>
+
+						<style scoped lang="scss">
+						...
+						</style>
+						```
+						</textarea>
+					</section>
 				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 					<section>
 						<h2>Template</h2>
@@ -156,8 +175,7 @@
 						)
 						.then(response => {
 							this.searchSuggestions = response.data;
-						})
-						.catch(e => this.errors.push(e));
+						});
 				}
 			}
 		},
@@ -173,17 +191,6 @@
 	};
 </script>
 </code></pre>
-					</section>
-
-				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
-					<section>
-						<h2>Styles</h2>
-<pre><code class="html"><style scoped lang="scss">
-.centeralign {
-	margin-right: auto;
-	margin-left: auto;
-}
-</style></code></pre>
 					</section>
 
 				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
@@ -224,7 +231,7 @@ export default {
         <!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
         <section>
           <section>
-						<h1>Mix Ins</h1>
+						<h1>Mix-Ins</h1>
 					</section>
 					<section>
 						<h2>Definition</h2>
@@ -270,6 +277,36 @@ export default {
 </code></pre>
 					</section>
         </section>
+				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+				<section>
+				<section data-markdown>
+					<textarea data-template>
+## Axios Interceptors
+```
+// Add CSRF Token on every request
+axios.interceptors.request.use(
+  function (config) {
+    let csrfToken = Cookies.get('X-Csrf-Token');
+    config.headers = {
+      'X-Requested-With': 'XMLHttpRequest',
+      withCredentials: true,
+      'Access-Control-Allow-Credentials': true,
+      'X-Csrf-Token': csrfToken
+    };
+    return config;
+  },
+  function (error) {
+    // Do something with request error
+    return Promise.reject(error);
+  }
+);
+Vue.prototype.$http = axios;
+```
+					</textarea>
+				</section>
+
+				</section>
+
 				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 				<section>
 					<section>
