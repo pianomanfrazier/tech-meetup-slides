@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Web Dev Meetup | Aug 8, 2018</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/black.css" id="theme">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400|Old+Standard+TT:400' rel='stylesheet' type='text/css'> 
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+    <style type="text/css" media="screen">
+      .blockquote {
+        text-align: left;
+        font-size: 0.8em !important;
+        border-left: 1rem solid #ccc !important;
+        padding-left: 1em !important;
+      }
+      .blockquote a {
+        font-style: italic;
+			}
+			pre, code {
+				-moz-tab-size: 2;
+				-o-tab-size: 2;
+				tab-size: 2;
+			}
+    </style>
+		<!-- Printing and PDF exports -->
+		<script>
+		var link = document.createElement( 'link' );
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+		document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+        <section data-markdown>
+          <textarea data-template>
+					# Vue in SPOON
+
+					![Vue and Spoon logo](/images/header.png)
+          </textarea>
+				</section>
+
+				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+				<section>
+					<section data-markdown>
+						<textarea data-template>
+							# The Tech Stack
+						</textarea>
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+							- Java Backend
+								- JaxRS
+								- Apache Tomcat
+							- ExtJS for the desktop
+							- Vue for mobile
+								- webpack to build
+								- Vuetify component library
+						</textarea>
+					</section>
+				</section>
+				
+				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+				<section>
+					<section data-markdown>
+						<textarea data-template>
+
+							# The Search Bar
+
+						</textarea>
+					</section>
+
+				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+					<section data-markdown>
+						<textarea data-template>
+
+							![Mobile Search Bar](/images/mobile_search_bars.png)
+
+						</textarea>
+					</section>
+
+				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+					<section data-markdown>
+						<textarea data-template>
+
+							![Mobile Type Ahead](/images/type_ahead.png)
+
+						</textarea>
+					</section>
+
+				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+					<section>
+						<h2>Template</h2>
+<pre><code class="html"><template>
+<form v-on:submit.prevent="submitQuery()">
+	<div class="searchbar">
+		<input
+		:value="value"
+		@input="$emit('input', $event.target.value)"
+		>
+		<v-icon v-if="value == ''" @click="submitQuery()">search</v-icon>
+		<v-icon v-if="value !== ''" @click="$emit('input', ''), submitQuery()">clear</v-icon>
+	</div>
+
+	<v-card v-if="searchSuggestions.length > 0">
+		<v-list dense>
+		<v-list-tile v-for="i in searchSuggestions" @click="submitQuery(i.name);">
+		<v-list-tile-content>
+		{{ i.name }}
+		</v-list-tile-content>
+		</v-list-tile>
+		</v-list>
+	</v-card>
+</form>
+</template></code></pre>
+					</section>
+
+				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+					<section>
+						<h2>Business</h2>
+<pre><code class="javascript"><script>
+	import axios from 'axios';
+	import _ from 'lodash';
+	
+	export default {
+		name: 'SearchBar',
+		props: ['value', 'hideSuggestions'],
+		data () {
+			return {
+				searchSuggestions: []
+			};
+		},
+		methods: {
+			submitQuery (query) {
+				if (query) {
+					this.$emit('input', query);
+				}
+				this.searchSuggestions = [];
+				this.$emit('submitSearch');
+			},
+			getSearchSuggestions () {
+				if (!this.hideSuggestions) {
+					axios
+						.get(
+							`/openstorefront/api/v1/service/search/suggestions?query=${this.value}&componentType=`
+						)
+						.then(response => {
+							this.searchSuggestions = response.data;
+						})
+						.catch(e => this.errors.push(e));
+				}
+			}
+		},
+		watch: {
+			value: _.throttle(function () {
+				if (this.value === '') {
+					this.searchSuggestions = [];
+				} else if (!this.searchQueryIsDirty) {
+					this.getSearchSuggestions();
+				}
+			}, 400)
+		}
+	};
+</script>
+</code></pre>
+					</section>
+
+				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+					<section>
+						<h2>Styles</h2>
+<pre><code class="html"><style scoped lang="scss">
+.centeralign {
+	margin-right: auto;
+	margin-left: auto;
+}
+</style></code></pre>
+					</section>
+
+				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+					<section>
+						<h2>Usage</h2>
+<pre><code class="html"><template>
+<div>
+	...
+	<SearchBar v-on:submitSearch="submitSearch()" :hideSuggestions="searchQueryIsDirty" v-model="searchQuery"></SearchBar>
+	...
+</div>
+</template>
+
+<script>
+import SearchBar from './subcomponents/SearchBar';
+
+export default {
+	name: 'SearchPage',
+	components: {
+		SearchBar,
+		...
+	},
+	...
+	data () {
+		return {
+			...
+			searchResults: {},
+			searchQueryIsDirty: {},
+			...
+		}
+	}
+}
+</script>
+</code></pre>
+					</section>
+				</section>
+
+        <!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+        <section>
+          <section>
+						<h1>Mix Ins</h1>
+					</section>
+					<section>
+						<h2>Definition</h2>
+<pre><code>import store from '../store';
+
+export default {
+	data: () => ({
+		rules: {
+			email: value => {
+				const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+				return pattern.test(value) || 'Email address is not in a valid format';
+			},
+			required: value => {
+				return (!!value && /^\s+$/.test(value) === false) || 'This field is required';
+			},
+			password: value => {
+				let regex = new RegExp('^(?=.*[A-Z])(?=.*\\d)(?=.*[~`!@#$%^&*()-+=<>:;"\',.?])[A-Za-z\\d~`!@#$%^&*()-+=<>:;"\',.?]{' + String(store.state.securitypolicy.minPasswordLength) + ',}$');
+				return regex.test(value) ||
+				`Password must contain 1 uppercase, 1 number, 1 special character (i.e. @$!%*#?&), and be at least ${store.state.securitypolicy.minPasswordLength} characters`;
+			}
+		}
+	})
+};</code></pre>	
+					</section>
+
+					<section>
+						<h2>Usage</h2>
+<pre><code class="html"><template>
+	...
+		<v-text-field
+		:rules="[rules.required, rules.email]"
+	></v-text-field>
+	...
+</template>
+<script>
+import validators from '../util/validators';
+
+export default {
+	name: 'RegistrationPage',
+	mixins: [validators],
+	...
+}</script>
+</code></pre>
+					</section>
+        </section>
+				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+				<section>
+					<section>
+						<h1>Tooling</h1>
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+							## Vue CLI
+
+							```bash
+							npm install -g @vue/cli
+							vue init webpack new-project
+							```
+
+							See the [vue-webpack-boilerplate](https://github.com/vuejs-templates/webpack)
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							## Webpack
+
+							```bash
+							# run the dev server
+							# proxies to the backend
+							npm run dev
+
+							# build for production
+							npm run build
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							## VSCode integration
+
+							Linting with ESlint semi-standard
+
+							![VSCode error](/images/ide.png)
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							## Browser Plugins
+
+							![Firefox Vue Plugin](/images/dev_tools.png)
+
+						</textarea>
+					</section>
+
+        </section>
+
+				<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Slide  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+				<!--
+        <section>
+          <section>Vertically Nested Slides</section>
+          <section>I'm down</section>
+        </section>
+
+				<section>
+        <section data-markdown>
+          <textarea data-template>
+						## Page title
+						
+						- a list of
+						- stuff
+						- in markdown `code`
+
+						```python
+						num = 5
+						print("number {}".format(num))
+						```
+
+						And a [link](https://www.google.com)
+          </textarea>
+				</section>
+        <section data-markdown>
+          <textarea data-template>
+						## A Cat Picture 
+						
+						![kitty](https://api.thecatapi.com/v1/images/search?format=src&mime_types=image/gif)
+          </textarea>
+				</section>
+				</section>
+				-->
+
+
+			</div><!-- END OF .slides -->
+		</div><!-- END OF .reveal -->
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="reveal.js"></script>
+
+		<script>
+		Reveal.initialize({
+			dependencies: [
+				{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+        { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+        { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+				{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } }
+			],
+			history: true,
+			overview: true,
+			mousewheel: true,
+			transition: 'convex', // none/fade/slide/convex/concave/zoom
+			});
+		</script>
+
+	</body>
+</html>
